@@ -1,5 +1,8 @@
 import math
 import random
+
+import statistics
+
 import TFunctions
 from statistics import NormalDist
 
@@ -324,25 +327,35 @@ class SimulatedAnnealing:
             self.okoli = int(self.fes / pocet_kol) + 1
             self.soucasne_okoli = self.okoli
 
-    def nastaveni_teploty(self, pocatecni_modifikator, konecny_modifikator):
-        randval = self.generate([])
-        if self.algoritmus == 'FirstDeJong':
-            vnow = TFunctions.FirstDeJong(randval).compute()
-        elif self.algoritmus == 'SecondDeJong':
-            vnow = TFunctions.SecondDeJong(randval).compute()
-        elif self.algoritmus == 'Schwefel':
-            vnow = TFunctions.Schwefel(randval).compute()
-        elif self.algoritmus[:3] == 'TB_':
-            vnow = TFunctions.TestBed(self.algoritmus, randval).compute()
-        else:
-            print("Špatný algoritmus!!!")
-            self.fes = 1
-        self.fes -= 1
-        self.bestarg = randval
-        self.vhodnost = vnow
-        self.pocatecni_teplota = abs(pocatecni_modifikator * vnow)
-        self.konecna_teplota = abs(konecny_modifikator * vnow)
-        self.soucasna_teplota = self.pocatecni_teplota
+
+    def nastaveni_teploty(self):
+        vysl = []
+        for i in range(100):
+            randval = self.generate([])
+            if self.algoritmus == 'FirstDeJong':
+                vnow = TFunctions.FirstDeJong(randval).compute()
+            elif self.algoritmus == 'SecondDeJong':
+                vnow = TFunctions.SecondDeJong(randval).compute()
+            elif self.algoritmus == 'Schwefel':
+                vnow = TFunctions.Schwefel(randval).compute()
+            elif self.algoritmus[:3] == 'TB_':
+                vnow = TFunctions.TestBed(self.algoritmus, randval).compute()
+            else:
+                print("Špatný algoritmus!!!")
+                self.fes = 1
+                break
+            self.fes -= 1
+            if vnow > 0:
+                vysl.append(vnow)
+        if len(vysl) > 0:
+            aver = statistics.mean(vysl)
+            av = math.log10(aver) / 1.5
+            # print(av)
+            self.bestarg = randval
+            self.vhodnost = vnow
+            self.pocatecni_teplota = abs(10 ** av)
+            self.konecna_teplota = abs(10 ** (av/4))
+            self.soucasna_teplota = self.pocatecni_teplota
 
     def generate(self, input_vector):
         output_vector = []

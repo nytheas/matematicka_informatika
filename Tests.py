@@ -1,7 +1,7 @@
 import Algorithms
 import statistics
 import matplotlib.pyplot as plt
-
+import time
 
 class Results:
     def __init__(self, algorithm, function, runtimes, iterations, dimensions):
@@ -226,28 +226,44 @@ dimensions = 5
 fes = 50000  # pro D5
 fes = 1000000  # pro D10
 
+runtimes = 30
 fes = 50000
 
 
 result_list = {}
-
+t0 = time.time()
 'TestBed1'
-for tmp in range(1, 11):
-    funct = "TB_" + str(tmp)
-    for run in range(1, runtimes + 1):
-        resid = "SimulatedAnnealing" + funct
-        if resid not in result_list:
-            result_list[resid] = Results('SimulatedAnnealing', funct, runtimes, fes, dimensions)
-        x = Algorithms.SimulatedAnnealing(fes, 10, dimensions, 0.1, funct,
-                                          pocatecni_teplota=100000000,
-                                          konecna_teplota=1000,
-                                          redukce_teploty='',
-                                          verbose=False, print_all=False, file='', id_spusteni=run)
-        x.dynamicke_nastaveni(pocet_kol=100, nastaveni_redukce_teploty=True)
-        x.compute()
-        print(x.vhodnost, x.soucasna_teplota)
-        result_list[resid].instances[run] = OneResult(run, x.bestarg[:], x.vhodnost, x.vysledky[:])
+
+for kon_teplota in [1]: #[10**0, 10**1, 10**2, 10**3, 10**4]:
+    for pt in [100]: #[10**1, 10**2, 10**3, 10**4, 10**5]:
+        poc_teplota = kon_teplota * pt
+        for pocet_kol in  [1000]: # [10, 50, 100, 500, 1000]:
+            for id_funct in range(1, 11):
+                funct = "TB_" + str(id_funct)
+                for run in range(1, runtimes + 1):
+                    resid = "SimulatedAnnealing" +", KT:" + str(kon_teplota) +", PT:" + str(poc_teplota) +", PK:" + str(pocet_kol) + ', F:' +  funct
+                    if resid not in result_list:
+                        result_list[resid] = Results(resid, funct, runtimes, fes, dimensions)
+                    x = Algorithms.SimulatedAnnealing(fes, 10, dimensions, 0.1, funct,
+                                                      pocatecni_teplota=poc_teplota,
+                                                      konecna_teplota=kon_teplota,
+                                                      redukce_teploty='',
+                                                      verbose=False, print_all=False, file='', id_spusteni=run)
+                    x.dynamicke_nastaveni(pocet_kol=fes/50, nastaveni_redukce_teploty=True)
+                    x.nastaveni_teploty()
+                    x.compute()
+                    # print(x.vhodnost, x.soucasna_teplota)
+                    result_list[resid].instances[run] = OneResult(run, x.bestarg[:], x.vhodnost, x.vysledky[:])
+
+
+file = open('tmp.txt',"w")
 
 for i in result_list:
     result_list[i].count_stats()
-    print(result_list[i].printstats())
+    file.write(result_list[i].printstats())
+    file.write("\n")
+
+    # print(result_list[i].printstats())
+
+file.close()
+print(time.time() - t0)

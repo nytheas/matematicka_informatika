@@ -1,7 +1,7 @@
 import math
 import random
 from PIL import ImageDraw, Image
-
+import statistics
 
 class Salesman:
     def __init__(self):
@@ -16,6 +16,7 @@ class Salesman:
         self.image_y = 1000
         self.edge = 10
         self.tabu_length = 5
+        self.calculations = 0
 
 
 class TravelPoint:
@@ -80,13 +81,17 @@ def format_coord(coord):
 
 
 def distance(point_a, point_b):
+    global counter_distance
+    counter_distance += 1
     return math.sqrt((point_a.x - point_b.x)**2 + (point_a.y - point_b.y)**2)
 
 
 def count_distance(order):
     global travel_points
     global s
+    global counter_full_distance
     dist = 0
+    counter_full_distance += 1
     for i in range(len(order)):
         dist += distance(travel_points[order[i]], travel_points[order[(i+1) % len(order)]])
     return dist
@@ -116,6 +121,7 @@ def algorithm_random():
         not_visited.pop(now)
     update_values(visited)
     s.order = visited[:]
+    s.dist = count_distance(s.order)
 
 
 def algorithm_greedy():
@@ -151,10 +157,12 @@ def algorithm_greedy():
 def algorithm_tabu():
     global travel_points
     global s
+    algorithm_greedy()
     order = s.order[:]
+
     #print(s.order, s.tp)
     tabu_list = []
-    for i in range(100):
+    for i in range(1000):
         order, switch, tabu_list = tabu_best_switch(order, tabu_list)
         #print(count_distance(order))
         if switch == 0:
@@ -167,26 +175,28 @@ def algorithm_tabu():
 def algorithm_stochastic_tabu(fes, fes_in_round):
     global travel_points
     global s
-    algorithm_random()
+    algorithm_greedy()
+    # algorithm_insertion('random')
     order = s.order[:]
     tabu_list = []
+    intermitent_results = []
     while fes > 0:
-        fes, order, tabu_list = tabu_stochastic_best_switch(fes, fes_in_round, order, tabu_list)
+        intermitent_results, fes, order, tabu_list = tabu_stochastic_best_switch(intermitent_results, fes, fes_in_round, order, tabu_list)
 
     best_dist = count_distance(order)
     if best_dist < s.dist:
         s.order = order[:]
         s.dist = count_distance(s.order)
+    return intermitent_results
 
 
-def tabu_stochastic_best_switch(fes, fes_in_round, order, tabu_list):
+def tabu_stochastic_best_switch(intermitent_results, fes, fes_in_round, order, tabu_list):
     global travel_points
     global s
     count = len(order)
     best_dist = 10**100
     best_i = -1
     best_j = -1
-
     # for i, j in [(i, j) for i in range(count) for j in range(count) if i < j]:
     while fes_in_round > 0 and fes > 0:
         i = random.randint(0, count-1)
@@ -213,7 +223,9 @@ def tabu_stochastic_best_switch(fes, fes_in_round, order, tabu_list):
     order[best_i], order[best_j] = order[best_j], order[best_i]
     if best_dist < s.dist:
         s.order = order[:]
-    return fes, order, tabu_list
+        s.dist = best_dist
+    intermitent_results.append(s.dist)
+    return intermitent_results, fes, order, tabu_list
 
 
 def tabu_best_switch(order, tabu_list):
@@ -245,10 +257,14 @@ def tabu_best_switch(order, tabu_list):
         return order, 1, tabu_list
 
 
-def algorithm_insertion():
+def algorithm_insertion(type_of_insertion):
     global travel_points
     global s
 
+
+    if type_of_insertion not in ['random', 'nearest', 'farthest', 'cheapest']:
+        print("Wrong type of insertion, using default (random)")
+        type_of_insertion = 'random'
     visited = []
     not_visited = []
     for i in travel_points:
@@ -261,8 +277,8 @@ def algorithm_insertion():
         not_visited.pop(tp)
 
     while len(not_visited) > 0:
-        visited, not_visited = insertion_next('random', visited, not_visited)
-        print(str(len(not_visited)) + "/" + str(len(visited)))
+        visited, not_visited = insertion_next(type_of_insertion, visited, not_visited)
+        # print(str(len(not_visited)) + "/" + str(len(visited)))
     s.order = visited[:]
     s.dist = count_distance(visited)
 
@@ -338,16 +354,64 @@ def insertion_distance(inner_function, visited, not_visited):
             return i
 
 
+def compute_results(results, algorithm=''):
+    min_result = 10**100
+    max_result = 0
+    median_result = statistics.median(results)
+    stdev_result = statistics.stdev(results)
+
+    for i in results:
+        if i < min_result:
+            min_result = i
+        if i > max_result:
+            max_result = i
+
+    min_result = round(min_result, 2)
+    max_result = round(max_result, 2)
+    median_result = round(median_result, 2)
+    stdev_result = round(stdev_result, 2)
+    print("algorithm: %s; iterations: %s; min: %s; max: %s; median: %s; stdev: %s" % (algorithm, str(len(results)), str(min_result), str(max_result),
+          str(median_result), str(stdev_result)))
+
+
 s = Salesman()
 travel_points = {}
 
 load_file("tsp.txt")
 
+counter_distance = 0
+counter_full_distance = 0
+
 iterations = 30
 
-for i in range(iterations):
-    pass
+results = []
+used_distance = []
+used_full_distance = []
 
+partial_results = {}
+
+for i in range(iterations):
+    s = Salesman()
+    travel_points = {}
+    load_file("tsp.txt")
+    #partial_results[i] = algorithm_stochastic_tabu(10000, 100)
+    algorithm_tabu()
+    print("iteration %s: %s; computations: %s, full computations: %s" % (str(i), str(s.dist), str(counter_distance), str(counter_full_distance)))
+    results.append(s.dist)
+    used_distance.append(counter_distance)
+    used_full_distance.append(counter_full_distance)
+    del s
+    del travel_points
+    counter_distance = 0
+    counter_full_distance = 0
+
+compute_results(results, "Tabu")
+compute_results(used_distance, "Tabu - Used Distance")
+compute_results(used_full_distance, "Tabu - Used Full Distnance")
+
+#
+# for i in partial_results:
+#         print(partial_results[i])
 
 #
 # for i in distances:
@@ -364,8 +428,8 @@ for i in range(iterations):
 # algorithm_insertion()
 # draw_picture()
 
-print("order:", s.order)
-print("distance:", s.dist)
+# print("order:", s.order)
+# print("distance:", s.dist)
 
 # algorithm_tabu()
 # draw_picture()

@@ -53,7 +53,7 @@ class TestBed:
             print("function not exist")
             return 0
         if (self.func == 6 or self.func == 7) and len(self.values) == 5:
-            print("combination not supported")
+            # print("combination not supported")
             return 0
         return 1
 

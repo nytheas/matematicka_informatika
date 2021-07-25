@@ -1,0 +1,12 @@
+algorithm: RandomSearch; function: FirstDeJong; runtimes: 30; minimum: 7.161660818485509; maximum: 17.326579916070315; mean: 11.855442189537985; median: 11.762584411131169; stdev: 2.6129808336024056
+algorithm: RandomSearch; function: SecondDeJong; runtimes: 30; minimum: 1018.8889705621925; maximum: 5929.904160778934; mean: 2775.709758727533; median: 2499.858882110479; stdev: 1200.7910753375147
+algorithm: RandomSearch; function: Schwefel; runtimes: 30; minimum: -2669.7487277222303; maximum: -2061.9970488223535; mean: -2347.136638877494; median: -2335.1951939276178; stdev: 167.96532758595438
+algorithm: LocalSearch; function: FirstDeJong; runtimes: 30; minimum: 1.8389294540893546; maximum: 3.4991417686259734; mean: 2.5966796608455236; median: 2.584926457243917; stdev: 0.45668983601236657
+algorithm: LocalSearch; function: SecondDeJong; runtimes: 30; minimum: 149.43330156200645; maximum: 639.6795850989864; mean: 387.05223437671293; median: 379.3536367268261; stdev: 127.99571501859134
+algorithm: LocalSearch; function: Schwefel; runtimes: 30; minimum: -2891.1070821810795; maximum: -2281.5087500953696; mean: -2512.2978782900395; median: -2468.1708394738353; stdev: 160.23903094512963
+algorithm: HillClimbing; function: FirstDeJong; runtimes: 30; minimum: 0.5361280996187918; maximum: 1.3804455120058534; mean: 0.9617280118286644; median: 0.9489210310067677; stdev: 0.24838725422056593
+algorithm: HillClimbing; function: SecondDeJong; runtimes: 30; minimum: 54.044076116158294; maximum: 194.82048635418738; mean: 92.74047071765666; median: 90.05804737434302; stdev: 26.46446606171584
+algorithm: HillClimbing; function: Schwefel; runtimes: 30; minimum: -2976.5632815055155; maximum: -2080.3092415690135; mean: -2581.924187777648; median: -2649.9539917684497; stdev: 266.59174746829075
+algorithm: SimulatedAnnealing; function: FirstDeJong; runtimes: 30; minimum: 1.2029878400844438; maximum: 7.377675784291675; mean: 3.7654930900625314; median: 3.622796428649602; stdev: 1.5380873808250668
+algorithm: SimulatedAnnealing; function: SecondDeJong; runtimes: 30; minimum: 62.57246955268401; maximum: 299.45086637589657; mean: 151.58145172123423; median: 148.97886809493718; stdev: 54.141363892085444
+algorithm: SimulatedAnnealing; function: Schwefel; runtimes: 30; minimum: -3417.6453070261873; maximum: -1819.7034908115475; mean: -2703.431350746837; median: -2764.5022617794275; stdev: 406.8021164588228

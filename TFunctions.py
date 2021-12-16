@@ -42,6 +42,17 @@ class Schwefel:
         return x
 
 
+class Rastrigin:
+    def __init__(self, values):
+        self.values = values
+
+    def compute(self):
+        x = 0
+        for i in self.values:
+            x += i**2 - 10*math.cos(2*math.pi*i)
+        x *= 2 * len(self.values)
+        return x
+
 class TestBed:
     def __init__(self, func, values):
         self.func = int(func.replace("TB_", ""))
@@ -63,3 +74,4 @@ class TestBed:
             return 0
         cec20.cec20_test_func(self.values.ctypes.data_as(POINTER(c_double)), byref(x), len(self.values), 1, self.func)
         return x.value
+

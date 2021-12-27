@@ -46,11 +46,28 @@ class Rastrigin:
     def __init__(self, values):
         self.values = values
 
+    # def compute(self):
+    #     x = 0
+    #     for i in self.values:
+    #         x += (i**2 - 10*math.cos(2*math.pi*i))
+    #     x = 10*len(self.values) * x
+    #
+    #     if x == 0:
+    #         print(self.values)
+    #     return x
+
     def compute(self):
-        x = 0
+        '''I had to improvise, because the "easy" version rounded 10 + 10^-18 to 10, so function hit 0
+         when all values were around +- 10^-9  '''
+        sum_1 = 0
+        sum_2 = 0
+        sum_3 = 10 * len(self.values)
         for i in self.values:
-            x += i**2 - 10*math.cos(2*math.pi*i)
-        x *= 2 * len(self.values)
+            sum_1 += i**2
+            sum_2 -= 10*math.cos(2*math.pi*i)
+        x = sum_3 + sum_2
+        x += sum_1
+
         return x
 
 class TestBed:

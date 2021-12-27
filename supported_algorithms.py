@@ -1,20 +1,20 @@
 
 diferencial_evolution = {}
 
-diferencial_evolution['supported_algorithm'] = ['firstdejong',
-                                                'seconddejong',
-                                                'schwefel',
-                                                'rastrigin',
-                                                'tb_1',
-                                                'tb_2',
-                                                'tb_3',
-                                                'tb_4',
-                                                'tb_5',
-                                                'tb_6',
-                                                'tb_7',
-                                                'tb_8',
-                                                'tb_9',
-                                                'tb_10']
+diferencial_evolution['supported_algorithm'] = ['FirstDeJong',
+                                                'SecondDeJong',
+                                                'Schwefel',
+                                                'Rastrigin',
+                                                'TB_1',
+                                                'TB_2',
+                                                'TB_3',
+                                                'TB_4',
+                                                'TB_5',
+                                                'TB_6',
+                                                'TB_7',
+                                                'TB_8',
+                                                'TB_9',
+                                                'TB_10']
 
 diferencial_evolution['mutation_type'] = ['rand',
                                           'best',

@@ -4,10 +4,13 @@ import sys
 import statistics
 import supported_algorithms
 
+
 class Member:
     def __init__(self, coords):
         self.coords = coords
         self.value = ''
+        self.F = ''
+        self.CR = ''
 
     def compute_value(self, algorithm):
         if algorithm == 'FirstDeJong':
@@ -26,33 +29,44 @@ class Member:
 
 
 class DifferencialEvolution:
-    def __init__(self):
-        self.g_max = 1000
-        self.NP = 50
-        self.F = 0.5
-        self.CR = 0.9
-        self.range_min = -500
-        self.range_max = 500
-        self.dimensions = 10
+    def __init__(self, FES = 10000, NP = 50, dimensions=10, F=0.5, CR=0.9, range_min=-100, range_max=100,
+                 algorithm='FirstDeJong', mutation_type='DE/rand/1', crossbreding_type='binomial', strategy='jDE'):
+
+        self.FES = FES
+        self.NP = NP
+        self.g_max = int(FES/NP)
+        self.F = F
+        self.CR = CR
+        self.range_min = range_min
+        self.range_max = range_max
+        self.dimensions = dimensions
         self.members = []
-        self.algorithm = 'FirstDeJong'
-        self.mutation_type = 'DE/rand/1'.split("/")
-        self.crossbreeding_type = 'binomial'
+        self.algorithm = algorithm
+        self.mutation_type = mutation_type.split("/")
+        self.crossbreeding_type = crossbreding_type
         self.stats = {}
-        self.strategy = 'DE'
+        self.strategy = strategy
+        self.probability_change_F = 0.1
+        self.change_F_min = 0.1
+        self.change_F_max = 1.0
+        self.probability_change_CR = 0.1
+        self.change_CR_min = 0
+        self.change_CR_max = 1.0
+        self.round_stats = {}
+        self.round_best_value = []
 
     def compute(self):
         self.check_inputs()
         if len(self.members) == 0:
             self.initialize_vectors()
-        self.get_stats()
+        self.get_round_stats(0)
         for i in range(1, self.g_max+1):
-            print("Starting round %s " % str(i))
             self.evolution_round()
-            self.get_stats()
+            self.get_round_stats(i)
+
 
     def check_inputs(self):
-        if self.algorithm.lower() not in supported_algorithms.diferencial_evolution['supported_algorithm']:
+        if self.algorithm not in supported_algorithms.diferencial_evolution['supported_algorithm']:
             print("Algorithm not supported: %s" % self.algorithm)
             sys.exit(1)
         if self.mutation_type[1] not in supported_algorithms.diferencial_evolution['mutation_type']:
@@ -63,6 +77,14 @@ class DifferencialEvolution:
             sys.exit(1)
         if self.crossbreeding_type.lower() not in supported_algorithms.diferencial_evolution['crossbreeding_type']:
             print("Crossbreeding type not supported: %s" % self.crossbreeding_type)
+            sys.exit(1)
+        if self.strategy == 'DE':
+            self.probability_change_F = 0
+            self.probability_change_CR = 0
+        elif self.strategy == 'jDE':
+            pass
+        else:
+            print("Strategy not supported %s" % self.strategy)
             sys.exit(1)
 
     def evolution_round(self):
@@ -81,6 +103,8 @@ class DifferencialEvolution:
                 val = self.range_min + random.random() * (self.range_max-self.range_min)
                 coords.append(val)
             tmp = Member(coords)
+            tmp.F = self.F
+            tmp.CR = self.CR
             tmp.compute_value(self.algorithm)
             self.members.append(tmp)
 
@@ -89,6 +113,15 @@ class DifferencialEvolution:
         count = int(self.mutation_type[2])
         for i in range(self.NP):
             support = []
+
+            # compute F for jDE variant
+            if random.random() < self.probability_change_F:
+                used_F = self.change_F_min + random.random() * (self.change_F_max - self.change_F_min)
+                if used_F > 0.9:
+                    used_F = 0.9
+            else:
+                used_F = x[i].F
+
             # Special behavior for 'DE/randrl/1
             if self.mutation_type[1] in ['randrl']:
                 count -= 1
@@ -126,12 +159,14 @@ class DifferencialEvolution:
 
             # Last part (F * r1 - r2 for x times)
             for j in range(count):
-                support.append(combine_vectors(x[random.randint(0, self.NP-1)].coords, x[random.randint(0, self.NP-1)].coords, full_mult=self.F, oper="-"))
+                support.append(combine_vectors(x[random.randint(0, self.NP-1)].coords, x[random.randint(0, self.NP-1)].coords, full_mult=used_F, oper="-"))
 
             for s in support:
                 main = combine_vectors(main, s, oper='+')
-
-            v.append(self.check_boundries(main))
+            main = self.check_boundries(main)
+            tmp = Member(main)
+            tmp.F = used_F
+            v.append(tmp)
             del support
         return v
 
@@ -139,30 +174,38 @@ class DifferencialEvolution:
         u = []
 
         for i in range(self.NP):
+            # for jDE variant
+            if random.random() < self.probability_change_CR:
+                used_CR = self.change_CR_min + random.random() * (self.change_CR_max - self.change_CR_min)
+            else:
+                used_CR = x[i].CR
+
             coords = []
             if self.crossbreeding_type == 'binomial':
                 for j in range(self.dimensions):
-                    if random.random() <= self.CR:
-                        coords.append(v[i][j])
+                    if random.random() <= used_CR:
+                        coords.append(v[i].coords[j])
                     else:
                         coords.append(x[i].coords[j])
             elif self.crossbreeding_type == 'exponential':
                 count = 1
                 stop = False
                 while count < self.dimensions and not stop:
-                    if random.random() <= self.CR:
+                    if random.random() <= used_CR:
                         count += 1
                     else:
                         stop = True
                 start_point = random.randint(0, self.dimensions-1)
                 for j in range(self.dimensions):
                     if start_point <= j <= start_point + count - 1 or start_point <= j + self.dimensions <= start_point + count - 1:
-                        coords.append(v[i][j])
+                        coords.append(v[i].coords[j])
                     else:
                         coords.append(x[i].coords[j])
 
             tmp = Member(coords)
             tmp.compute_value(self.algorithm)
+            tmp.F = v[i].F
+            tmp.CR = used_CR
             u.append(tmp)
             del coords
 
@@ -202,12 +245,16 @@ class DifferencialEvolution:
         for i in range(len(self.members)):
             print(self.members[i].value)
 
-    def get_stats(self):
-        self.stats['count'] = len(self.members)
+    def get_stats(self, value_list='', round_num=0):
         vals = []
-        for i in range(len(self.members)):
-            vals.append(self.members[i].value)
-
+        if value_list == '':
+            value_list == self.members
+            for i in range(len(value_list)):
+                vals.append(self.members[i].value)
+        else:
+            vals = value_list
+        self.stats['count'] = len(vals)
+        self.stats['FES_remaining'] = self.FES - (round_num * self.NP)
         self.stats['minimum'] = min(vals)
         self.stats['maximum'] = max(vals)
         if len(vals) > 1:
@@ -219,8 +266,21 @@ class DifferencialEvolution:
             self.stats['mean'] = min(vals)
             self.stats['stdev'] = 0
 
+        output = ''
         for i in self.stats:
-            print(i, self.stats[i])
+            output += str(i) + ": " + str(self.stats[i]) + "; "
+            #print(i, self.stats[i])
+        return output
+
+    def get_round_stats(self, round):
+        vals = []
+        for i in self.members:
+            vals.append(i.value)
+
+        stats = self.get_stats(vals, round)
+        self.round_best_value.append(self.stats['minimum'])
+        self.round_stats[round] = stats
+
 
 
 def combine_vectors(a, b, mult=1, full_mult=1, oper="+"):
@@ -233,6 +293,4 @@ def combine_vectors(a, b, mult=1, full_mult=1, oper="+"):
     return val
 
 
-xx = DifferencialEvolution()
-xx.compute()
 

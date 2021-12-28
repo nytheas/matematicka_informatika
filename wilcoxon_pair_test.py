@@ -94,7 +94,7 @@ def wilcoxon_pair_test(first_list, second_list):
     result = "95: %s; 99: %s" % (test_95_result, test_99_result)
     return result
 
-file = open("C:\\Projects\\matematicka informatika\\figures_evt_tb\\vysledky.txt", "r")
+file = open("C:\\Projects\\matematicka informatika\\figures_evt_tb – 20D\\vysledky.txt", "r")
 
 read_rows = {}
 rownum = 0
@@ -102,7 +102,7 @@ for row in file:
     rownum += 1
     text = row.split(";")
     values = text[9]
-    values = values.replace("values: [", "").replace("]\n", "").replace(" ","")
+    values = values.replace("values: [", "").replace(" ","").replace("]\n", "").replace("]", "")
     values = values.split(",")
     vals = []
     for v in values:

@@ -1,0 +1,8 @@
+algorithm: jDE; function: FirstDeJong; dimensions: 10; runtimes: 30; minimum: 1.820259783151042e-42; maximum: 1.7221714521560425e-38; mean: 1.687513092169027e-39; median: 4.164479180048727e-40; stdev: 3.7590013405677e-39
+algorithm: jDE; function: SecondDeJong; dimensions: 10; runtimes: 30; minimum: 0.06176469852622461; maximum: 2.001758344067902; mean: 1.085449929763326; median: 1.0472652991407063; stdev: 0.5057412720115679
+algorithm: jDE; function: Schwefel; dimensions: 10; runtimes: 30; minimum: -4189.828872724338; maximum: -4189.828872724338; mean: -4189.828872724338; median: -4189.828872724338; stdev: 0.0
+algorithm: jDE; function: Rastrigin; dimensions: 10; runtimes: 30; minimum: 1.983163988163371e-29; maximum: 7.566683087208007e-26; mean: 1.3075953560823086e-26; median: 2.0251095173064004e-27; stdev: 2.0253013252028252e-26
+algorithm: jDE; function: FirstDeJong; dimensions: 30; runtimes: 30; minimum: 3.3353064160454046e-63; maximum: 1.0151299060713304e-59; mean: 7.997008074029314e-61; median: 9.689446274116795e-62; stdev: 1.991454425409922e-60
+algorithm: jDE; function: SecondDeJong; dimensions: 30; runtimes: 30; minimum: 7.614531958592322; maximum: 16.660980036641607; mean: 12.106685646573714; median: 12.217809700316398; stdev: 1.9638305355846835
+algorithm: jDE; function: Schwefel; dimensions: 30; runtimes: 30; minimum: -12569.486618173014; maximum: -12332.609948944137; mean: -12510.267450865795; median: -12569.486618173014; stdev: 80.80908278035437
+algorithm: jDE; function: Rastrigin; dimensions: 30; runtimes: 30; minimum: 9.794665857289679e-46; maximum: 6.782349809242622e-39; mean: 3.045219631760677e-40; median: 1.49605460898254e-42; stdev: 1.2504602710524426e-39
